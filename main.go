@@ -69,11 +69,24 @@ func (u *Users) ShowDB() *Users {
 
 // Добавление строки Имя : Телефон
 func (u *Users) AddRow(name, number string) *Users {
+	isTrue := false
 	str := User{Name: name, Number: number}
-	users.Users = append(users.Users, str)
-	data, _ := json.MarshalIndent(users, "", "\t")
-	_ = os.WriteFile("db.json", data, 02)
-	return users
+
+	for _, val := range u.Users {
+		if val.Name == str.Name {
+			fmt.Println("Уже есть", str.Name)
+			isTrue = true
+			break
+		}
+	}
+
+	if !isTrue {
+		u.Users = append(u.Users, str)
+		fmt.Println(u.Users)
+		data, _ := json.MarshalIndent(u, "", "\t")
+		_ = os.WriteFile("db.json", data, 02)
+	}
+	return u
 
 }
 
@@ -107,7 +120,9 @@ func DeleteRowHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddRowHandler(w http.ResponseWriter, r *http.Request) {
+
 	fmt.Fprint(w, users.AddRow("Vladimir", "89039460606"))
+
 }
 
 func ChangeHumberHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,21 +131,18 @@ func ChangeHumberHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	checkJson()
+	//fmt.Println(users)
+	users.AddRow("Tes", "Test")
 	//wg := sync.WaitGroup{}
 	//wg.Add(2)
 	// вызываем обработчик с некой функцией внутри
-	go func() {
-		http.HandleFunc("/", ChangeHumberHandler)
-		//wg.Done()
-	}()
-	go func() {
-		//defer wg.Done()
-		//http.HandleFunc("/", FindNameHandler)
 
-	}()
-
-	//wg.Wait()
-	// Слушаем наш локальный сервер
-	http.ListenAndServe("localhost:8000", nil)
+	//http.HandleFunc("/", AddRowHandler)
+	////resp, err := http.Get("localhost:8000")
+	////
+	////fmt.Println(resp.Body, err)
+	////wg.Wait()
+	//// Слушаем наш локальный сервер
+	//http.ListenAndServe("localhost:8000", nil)
 
 }
